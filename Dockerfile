@@ -1,3 +1,3 @@
-FROM --platform=linux/amd64 prefectHQ/prefect:2-python3.11-2.14.5
+FROM --platform=linux/amd64 prefecthq/prefect:2.14.5-python3.11
 COPY requirements.txt .
-RUN pip install requirements.txt
+RUN pip install -r requirements.txt

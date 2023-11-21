@@ -15,9 +15,8 @@ push: null
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
   - prefect.deployments.steps.git_clone:
-      repository: git@github.com:kevingrismore/cloud-run-v2-test.git
+      repository: https://github.com/kevingrismore/cloud-run-v2-test.git
       branch: main
-      access_token: null
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
@@ -26,21 +25,29 @@ deployments:
     work_pool:
       name: cloud-run-v2-pool
       work_queue_name: default
-    
+      job_variables:
+        image: docker.io/prefecthq/prefect:2-latest
 
   - name: custom-image-flow
     entrypoint: custom_image_flow.py:hello_with_pandas
     work_pool:
       name: cloud-run-v2-pool
       work_queue_name: default
-      build:
+      job_variables:
+        image: "{{ build-image.image }}"
+    build:
+      - prefect.deployments.steps.run_shell_script:
+          id: get-commit-hash
+          script: git rev-parse --short HEAD
+          stream_output: false
       - prefect_docker.deployments.steps.build_docker_image:
           id: build-image
           requires: prefect-docker
           image_name: us-central1-docker.pkg.dev/prefect-sbx-sales-engineering/kevin-docker/cloud-run-v2-test
           tag: "{{ get-commit-hash.stdout }}"
           dockerfile: Dockerfile
-     push:
+          platform: linux/amd64
+    push:
       - prefect_docker.deployments.steps.push_docker_image:
           requires: prefect-docker
           image_name: "{{ build-image.image_name }}"

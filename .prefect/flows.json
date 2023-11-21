@@ -1,0 +1,4 @@
+{
+  "hello": "flow.py:hello",
+  "hello-with-pandas": "custom_image_flow.py:hello_with_pandas"
+}
